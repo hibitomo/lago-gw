@@ -1,0 +1,96 @@
+interfaces {
+    interface if0 {
+        config {
+            device {{wan_device}};
+            driver dpdk;
+            enabled true;
+            mtu 1514;
+            type ethernetCsmacd;
+        }
+        subinterfaces {
+            subinterface 0 {
+                config {
+                    enabled true;
+                }
+                ipv4 {
+                    addresses {
+                        address {{wan_ipv4}} {
+                            config {
+                                prefix-length {{wan_ipv4_prefix_length}};
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    interface if1 {
+        config {
+            device {{local_device}};
+            driver dpdk;
+            enabled true;
+            mtu 1514;
+            type ethernetCsmacd;
+        }
+        subinterfaces {
+            subinterface 0 {
+                config {
+                    enabled true;
+                }
+                ipv4 {
+                    addresses {
+                        address {{local_ipv4}} {
+                            config {
+                                prefix-length {{local_ipv4_prefix_length}};
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    interface tif0 {
+        config {
+            driver local;
+            enabled true;
+            type tunnel;
+        }
+        subinterfaces {
+            subinterface 0 {
+                config {
+                    enabled true;
+                }
+                tunnel {
+                    config {
+                        encaps-method direct;
+                        hop-limit 255;
+                        local-inet-address {{wan_ipv4}};
+                        remote-inet-address {{remote_ipv4}};
+                        security ipsec;
+                        tos 0;
+                    }
+                }
+            }
+        }
+    }
+}
+network-instances {
+    network-instance vrf1 {
+        interfaces {
+            interface if0 {
+                subinterface 0;
+            }
+            interface if1 {
+                subinterface 0;
+            }
+            interface tif0 {
+                subinterface 0;
+            }
+        }
+        config {
+            enabled true;
+            enabled-address-families IPV4;
+            type L3VRF;
+        }
+    }
+}
