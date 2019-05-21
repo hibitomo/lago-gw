@@ -15,7 +15,7 @@ conn %default
   compress=no
 
 conn ipsec-gw
-  leaf={{local_ipv4}}
+  left={{local_ipv4}}
   leftsubnet={{local_ipv4_subnet}}
   leftfirewall=no
   right={{remote_ipv4}}
