@@ -54,7 +54,7 @@ core = {{ rt_core }}
   # IPsec tunnel
   [tunnel.ipsec]
   # Enable/Disable CPU core binding for IPsec.
-  core_bind = false
+  core_bind = {{ ipsec_core_bind }}
   # Set CPU core mask.
   # It is better not to overlap with dpdk.core_mask.
   inbound_core_mask = {{ ipsec_in_cores }}

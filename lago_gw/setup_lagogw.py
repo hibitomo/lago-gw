@@ -30,6 +30,8 @@ vsw_opts = [
                default='3'),
     cfg.StrOpt('rt_core',
                default='4'),
+    cfg.StrOpt('ipsec_core_bind',
+                default='true'),
     cfg.StrOpt('ipsec_in_cores',
                default='0x20'),
     cfg.StrOpt('ipsec_out_cores',
@@ -77,6 +79,7 @@ def make_vsw_conf(conf, tpl):
         'rx_core':conf.vsw.rx_core,
         'tx_core':conf.vsw.tx_core,
         'rt_core':conf.vsw.rt_core,
+        'ipsec_core_bind':conf.vsw.ipsec_core_bind,
         'ipsec_in_cores':conf.vsw.ipsec_in_cores,
         'ipsec_out_cores':conf.vsw.ipsec_out_cores,
     }
