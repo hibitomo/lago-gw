@@ -4,7 +4,7 @@
 import sys
 import json
 import toml
-import netifaces
+import ethtool
 import ipaddress
 
 from oslo_config import cfg
@@ -87,7 +87,7 @@ def mask2length(subnet_mask):
     return ipaddress.ip_network('0.0.0.0/'+subnet_mask).prefixlen
 
 def device_id(if_name):
-    return "Not Implemented: Get PCIaddr or DEV_UUID from %s" % if_name
+    return ethtool.get_businfo(if_name)
 
 def make_ocd_conf(conf, tpl):
     conf.register_opts(ocd_opts, group='openconfigd')
@@ -103,22 +103,18 @@ def make_ocd_conf(conf, tpl):
     }
 
     if conf.openconfigd.wanif :
-        wanif_data = netifaces.ifaddresses(conf.openconfigd.wanif)
-        addr_list = wanif_data.get(netifaces.AF_INET)
-        if addr_list != None and config['wan_ipv4'] == None:
-            config['wan_ipv4'] = addr_list[0]['addr']
-            config['wan_ipv4_prefix_length'] = mask2length(addr_list[0]['netmask'])
+        if config['wan_ipv4'] == None:
+            config['wan_ipv4'] = ethtool.get_ipaddr(conf.openconfigd.wanif)
+            config['wan_ipv4_prefix_length'] = mask2length(ethtool.get_netmask(conf.openconfigd.wanif))
             config['wan_device'] = device_id(conf.openconfigd.wanif)
             conf.set_override('wan_ipv4', config['wan_ipv4'], group="openconfigd")
             conf.set_override('wan_ipv4_prefix_length', config['wan_ipv4_prefix_length'], group="openconfigd")
             conf.set_override('wan_device', config['wan_device'], group="openconfigd")
 
     if conf.openconfigd.lanif :
-        lanif_data = netifaces.ifaddresses(conf.openconfigd.lanif)
-        addr_list = lanif_data.get(netifaces.AF_INET)
-        if addr_list != None and config['local_ipv4'] == None:
-            config['local_ipv4'] = addr_list[0]['addr']
-            config['local_ipv4_prefix_length'] = mask2length(addr_list[0]['netmask'])
+        if config['local_ipv4'] == None:
+            config['local_ipv4'] = ethtool.get_ipaddr(conf.openconfigd.wanif)
+            config['local_ipv4_prefix_length'] = mask2length(ethtool.get_netmask(conf.openconfigd.lanif))
             config['local_device'] = device_id(conf.openconfigd.lanif)
             conf.set_override('local_ipv4', config['local_ipv4'], group="openconfigd")
             conf.set_override('local_ipv4_prefix_length', config['local_ipv4_prefix_length'], group="openconfigd")
