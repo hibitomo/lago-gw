@@ -87,7 +87,10 @@ def mask2length(subnet_mask):
     return ipaddress.ip_network('0.0.0.0/'+subnet_mask).prefixlen
 
 def device_id(if_name):
-    return ethtool.get_businfo(if_name)
+    devid = ethtool.get_businfo(if_name)
+    if devid == '':
+        devid = os.path.basename(os.readlink("/sys/class/net/" + if_name + "/device"))
+    return devid
 
 def make_ocd_conf(conf, tpl):
     conf.register_opts(ocd_opts, group='openconfigd')
