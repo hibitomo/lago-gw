@@ -3,7 +3,7 @@
 
 import sys
 import json
-import toml
+import os
 import ethtool
 import ipaddress
 
