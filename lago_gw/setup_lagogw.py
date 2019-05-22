@@ -3,7 +3,9 @@
 
 import sys
 import json
-import toml
+import os
+import ethtool
+import ipaddress
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -39,20 +41,15 @@ vsw_opts = [
 ]
 
 ocd_opts = [
-    cfg.StrOpt('wan_device',
-               default='0000:01:00.1'),
-    cfg.StrOpt('wan_ipv4',
-               default='10.0.1.1'),
-    cfg.StrOpt('wan_ipv4_prefix_length',
-               default='24'),
-    cfg.StrOpt('remote_ipv4',
-               default='172.0.2.15'),
-    cfg.StrOpt('local_device',
-               default='0000:01:00.1'),
-    cfg.StrOpt('local_ipv4',
-               default='172.0.2.16'),
-    cfg.StrOpt('local_ipv4_prefix_length',
-               default='24')
+    cfg.StrOpt('wanif'),
+    cfg.StrOpt('lanif'),
+    cfg.StrOpt('wan_device'),
+    cfg.StrOpt('wan_ipv4'),
+    cfg.StrOpt('wan_ipv4_prefix_length'),
+    cfg.StrOpt('remote_ipv4'),
+    cfg.StrOpt('local_device'),
+    cfg.StrOpt('local_ipv4'),
+    cfg.StrOpt('local_ipv4_prefix_length'),
 ]
 
 ipsec_opts = [
@@ -86,6 +83,15 @@ def make_vsw_conf(conf, tpl):
 
     return tpl.render(config)
 
+def mask2length(subnet_mask):
+    return ipaddress.ip_network('0.0.0.0/'+subnet_mask).prefixlen
+
+def device_id(if_name):
+    devid = ethtool.get_businfo(if_name)
+    if devid == '':
+        devid = os.path.basename(os.readlink("/sys/class/net/" + if_name + "/device"))
+    return devid
+
 def make_ocd_conf(conf, tpl):
     conf.register_opts(ocd_opts, group='openconfigd')
 
@@ -98,6 +104,24 @@ def make_ocd_conf(conf, tpl):
         'local_ipv4':conf.openconfigd.local_ipv4,
         'local_ipv4_prefix_length':conf.openconfigd.local_ipv4_prefix_length,
     }
+
+    if conf.openconfigd.wanif :
+        if config['wan_ipv4'] == None:
+            config['wan_ipv4'] = ethtool.get_ipaddr(conf.openconfigd.wanif)
+            config['wan_ipv4_prefix_length'] = mask2length(ethtool.get_netmask(conf.openconfigd.wanif))
+            config['wan_device'] = device_id(conf.openconfigd.wanif)
+            conf.set_override('wan_ipv4', config['wan_ipv4'], group="openconfigd")
+            conf.set_override('wan_ipv4_prefix_length', config['wan_ipv4_prefix_length'], group="openconfigd")
+            conf.set_override('wan_device', config['wan_device'], group="openconfigd")
+
+    if conf.openconfigd.lanif :
+        if config['local_ipv4'] == None:
+            config['local_ipv4'] = ethtool.get_ipaddr(conf.openconfigd.wanif)
+            config['local_ipv4_prefix_length'] = mask2length(ethtool.get_netmask(conf.openconfigd.lanif))
+            config['local_device'] = device_id(conf.openconfigd.lanif)
+            conf.set_override('local_ipv4', config['local_ipv4'], group="openconfigd")
+            conf.set_override('local_ipv4_prefix_length', config['local_ipv4_prefix_length'], group="openconfigd")
+            conf.set_override('local_device', config['local_device'], group="openconfigd")
 
     return tpl.render(config)
 
