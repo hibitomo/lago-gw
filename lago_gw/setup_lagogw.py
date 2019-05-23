@@ -141,7 +141,7 @@ def make_ipsec_secrets(conf, tpl):
     conf.register_opts(secrets_opts, group='secrets')
 
     config = {
-        'local_ipv4':conf.openconfigd.local_ipv4,
+        'local_ipv4':conf.openconfigd.wan_ipv4,
         'remote_ipv4':conf.openconfigd.remote_ipv4,
         'psk':conf.secrets.psk
     }
