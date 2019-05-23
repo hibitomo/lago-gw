@@ -53,10 +53,8 @@ ocd_opts = [
 ]
 
 ipsec_opts = [
-    cfg.StrOpt('local_ipv4_subnet',
-               default='10.0.1.0/24'),
-    cfg.StrOpt('remote_ipv4_subnet',
-               default='192.168.1.0/24'),
+    cfg.StrOpt('local_ipv4_subnet'),
+    cfg.StrOpt('remote_ipv4_subnet'),
     cfg.StrOpt('ike',
                default='aes128-sha1-ecp521'),
     cfg.StrOpt('esp',
