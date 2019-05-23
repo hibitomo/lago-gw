@@ -127,7 +127,7 @@ def make_ipsec_conf(conf, tpl):
     conf.register_opts(ipsec_opts, group='ipsec')
 
     config = {
-        'local_ipv4':conf.openconfigd.local_ipv4,
+        'local_ipv4':conf.openconfigd.wan_ipv4,
         'local_ipv4_subnet':conf.ipsec.local_ipv4_subnet,
         'remote_ipv4':conf.openconfigd.remote_ipv4,
         'remote_ipv4_subnet':conf.ipsec.remote_ipv4_subnet,
