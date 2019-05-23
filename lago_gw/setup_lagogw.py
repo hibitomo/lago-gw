@@ -116,7 +116,7 @@ def make_ocd_conf(conf, tpl):
 
     if conf.openconfigd.lanif :
         if config['local_ipv4'] == None:
-            config['local_ipv4'] = ethtool.get_ipaddr(conf.openconfigd.wanif)
+            config['local_ipv4'] = ethtool.get_ipaddr(conf.openconfigd.lanif)
             config['local_ipv4_prefix_length'] = mask2length(ethtool.get_netmask(conf.openconfigd.lanif))
             config['local_device'] = device_id(conf.openconfigd.lanif)
             conf.set_override('local_ipv4', config['local_ipv4'], group="openconfigd")
