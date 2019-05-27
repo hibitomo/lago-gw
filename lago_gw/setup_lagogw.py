@@ -21,6 +21,12 @@ common_opts = [
     cfg.StrOpt('output-dir',
                default='.',
                help='Path to a directory to output created config files.'),
+    cfg.StrOpt('vsw-conf-dir',
+               default=None,
+               help='Path to a directory to output vsw.conf'),
+    cfg.StrOpt('ipsec-conf-dir',
+               default=None,
+               help='Path to a directory to output ipsec.conf (and ipsec.secrets)'),
 ]
 
 vsw_opts = [
@@ -162,28 +168,24 @@ def main():
     f = open(conf.output_dir + '/vsw.conf', 'w')
     f.write(vsw_conf)
     f.close()
-    # print(vsw_conf)
 
     tpl = env.get_template('openconfigd.conf.template')
     ocd_conf = make_ocd_conf(conf, tpl)
     f = open(conf.output_dir + '/openconfigd.conf', 'w')
     f.write(ocd_conf)
     f.close()
-    # print(ocd_conf)
 
     tpl = env.get_template('ipsec.conf.template')
     ipsec_conf = make_ipsec_conf(conf, tpl)
     f = open(conf.output_dir + '/ipsec.conf', 'w')
     f.write(ipsec_conf)
     f.close()
-    # print(ipsec_conf)
 
     tpl = env.get_template('ipsec.secrets.template')
     secrets_conf = make_ipsec_secrets(conf, tpl)
     f = open(conf.output_dir + '/ipsec.secrets', 'w')
     f.write(secrets_conf)
     f.close()
-    # print(secrets_conf)
 
     return
 
