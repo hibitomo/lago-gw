@@ -8,11 +8,9 @@ import ethtool
 import ipaddress
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from jinja2 import Environment, FileSystemLoader
 
-LOG = logging.getLogger(__name__)
 
 common_opts = [
     cfg.StrOpt('template-dir',
@@ -21,13 +19,23 @@ common_opts = [
     cfg.StrOpt('output-dir',
                default='.',
                help='Path to a directory to output created config files.'),
-    cfg.StrOpt('vsw-conf-dir',
-               default=None,
-               help='Path to a directory to output vsw.conf'),
-    cfg.StrOpt('ipsec-conf-dir',
-               default=None,
-               help='Path to a directory to output ipsec.conf (and ipsec.secrets)'),
 ]
+
+output_opts = [
+    cfg.StrOpt('vsw-conf',
+               default=None,
+               help='Path to a file to output vsw configuration.'),
+    cfg.StrOpt('ocd-conf',
+               default=None,
+               help='Path to a file to output openconfigd configuration.'),
+    cfg.StrOpt('ipsec-conf',
+               default=None,
+               help='Path to a file to output ipsec configuration.'),
+    cfg.StrOpt('ipsec-secrets',
+               default=None,
+               help='Path to a file to output ipsec secrets.')
+]
+
 
 vsw_opts = [
     cfg.StrOpt('dpdk_coremask',
@@ -89,7 +97,6 @@ def make_vsw_conf(conf, tpl):
 
 def mask2length(subnet_mask):
     return ipaddress.ip_network('0.0.0.0/'+subnet_mask).prefixlen
-
 def device_id(if_name):
     devid = ethtool.get_businfo(if_name)
     if devid == '':
@@ -158,32 +165,42 @@ def main():
     conf = cfg.ConfigOpts()
     conf.register_cli_opts(common_opts)
     conf(sys.argv[1:])
-
-    print('tesmplte-dir: %s' % conf.template_dir)
-    print('output-dir: %s' % conf.output_dir)
+    conf.register_opts(output_opts, group='output')
 
     env = Environment(loader=FileSystemLoader(conf.template_dir, encoding='utf8'))
     tpl = env.get_template('vsw.conf.template')
     vsw_conf = make_vsw_conf(conf, tpl)
-    f = open(conf.output_dir + '/vsw.conf', 'w')
+    if conf.output.vsw_conf :
+        f = open(conf.output.vsw_conf, 'w')
+    else:
+        f = open(conf.output_dir + '/vsw.conf', 'w')
     f.write(vsw_conf)
     f.close()
 
     tpl = env.get_template('openconfigd.conf.template')
     ocd_conf = make_ocd_conf(conf, tpl)
-    f = open(conf.output_dir + '/openconfigd.conf', 'w')
+    if conf.output.ocd_conf != None:
+        f = open(conf.output.ocd_conf, 'w')
+    else:
+        f = open(conf.output_dir + '/openconfigd.conf', 'w')
     f.write(ocd_conf)
     f.close()
 
     tpl = env.get_template('ipsec.conf.template')
     ipsec_conf = make_ipsec_conf(conf, tpl)
-    f = open(conf.output_dir + '/ipsec.conf', 'w')
+    if conf.output.ipsec_conf != None :
+        f = open(conf.output.ipsec_conf , 'w')
+    else:
+        f = open(conf.output_dir + '/ipsec.conf', 'w')
     f.write(ipsec_conf)
     f.close()
 
     tpl = env.get_template('ipsec.secrets.template')
     secrets_conf = make_ipsec_secrets(conf, tpl)
-    f = open(conf.output_dir + '/ipsec.secrets', 'w')
+    if conf.output.ipsec_secrets != None :
+        f = open(conf.output.ipsec_secrets, 'w')
+    else:
+        f = open(conf.output_dir + '/ipsec.secrets', 'w')
     f.write(secrets_conf)
     f.close()
 
