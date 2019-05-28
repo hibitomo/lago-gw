@@ -13,5 +13,5 @@ sudo ./setup.py install
 ## How to use
 
 ```
-setup-lagogw --config-file ./sample/setup.conf --output-dir . --template-dir ./templates
+setup-lagogw --config-file ./sample/setup.conf --template-dir ./templates
 ```
