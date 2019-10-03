@@ -40,6 +40,8 @@ output_opts = [
 vsw_opts = [
     cfg.StrOpt('dpdk_coremask',
                default='0x1c'),
+    cfg.StrOpt('dpdk_vdevs',
+               default='["crypto_openssl"]'),
     cfg.StrOpt('rx_core',
                default='2'),
     cfg.StrOpt('tx_core',
@@ -85,6 +87,7 @@ def make_vsw_conf(conf, tpl):
 
     config = {
         'dpdk_coremask':conf.vsw.dpdk_coremask,
+        'dpdk_vdevs':conf.vsw.dpdk_vdevs,
         'rx_core':conf.vsw.rx_core,
         'tx_core':conf.vsw.tx_core,
         'rt_core':conf.vsw.rt_core,
@@ -170,7 +173,8 @@ def main():
     env = Environment(loader=FileSystemLoader(conf.template_dir, encoding='utf8'))
     tpl = env.get_template('vsw.conf.template')
     vsw_conf = make_vsw_conf(conf, tpl)
-    if conf.output.vsw_conf :
+    if conf.output.vsw_conf != None :
+        print(conf.output.vsw_conf)
         f = open(conf.output.vsw_conf, 'w')
     else:
         f = open(conf.output_dir + '/vsw.conf', 'w')

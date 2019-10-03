@@ -24,6 +24,7 @@ memory_channel = 2
 pmd_path = "/usr/local/lib"
 num_elements = 131072
 cache_size = 256
+vdevs = {{ dpdk_vdevs }}
 
 # Openconfigd section
 [openconfig]
